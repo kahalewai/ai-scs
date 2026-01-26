@@ -40,7 +40,7 @@ The standard is organized around three mandatory control domains:
 Together, these domains ensure that every AI artifact influencing system behavior is **declared, verified, and continuously enforced**.
 
 For the complete formal specification — including definitions, requirements, and conformance criteria — see the full reference document:  
-https://github.com/your-org/ai-scs/blob/main/ai_scs_standard.md
+[https://github.com/kahalewai/ai-scs/blob/main/ai-scs_standard.md](https://github.com/kahalewai/ai-scs/blob/main/ai-scs_standard.md)
 
 <br>
 

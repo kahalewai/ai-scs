@@ -1,6 +1,6 @@
 <div align="center">
 
-# AI-SCS — AI Supply Chain Standard
+# AI-SCS Supply Chain Standard for AI Systems
 
 Welcome to the **AI-SCS** (AI Supply Chain Standard) Security Specification Landing
 

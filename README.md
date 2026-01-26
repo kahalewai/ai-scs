@@ -74,7 +74,7 @@ For the complete formal specification - including definitions, requirements, and
 
 ## Reference Implementation of AI-SCS
 
-For a reference implementation of AI-SCS, visit the AI Supply Chain Risk Management (AI-SCRM) Repository: <link> also released Apache 2.0
+For a reference implementation of AI-SCS, visit the AI Supply Chain Risk Management (AI-SCRM) Repository: [https://github.com/kahalewai/ai-scrm](https://github.com/kahalewai/ai-scrm), also released Apache 2.0
 
 <br>
 

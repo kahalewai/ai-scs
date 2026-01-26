@@ -65,7 +65,8 @@ Security, trust, and governance are **runtime-enforced properties**, not aspirat
 
 ## View the AI-SCS Security Specification
 
-For the complete formal specification — including definitions, requirements, and conformance criteria — see the full reference document:  
+For the complete formal specification - including definitions, requirements, and conformance criteria - see the full reference document:  
+
 [https://github.com/kahalewai/ai-scs/blob/main/ai-scs_standard.md](https://github.com/kahalewai/ai-scs/blob/main/ai-scs_standard.md)
 
 **Status:** Production-Ready  
@@ -159,5 +160,4 @@ We invite participation from:
 
 By working together, we can make **AI-SCS a foundational security standard** for trustworthy, production-grade AI systems.
 
-<br>
 <br>

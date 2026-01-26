@@ -39,9 +39,6 @@ The standard is organized around three mandatory control domains:
 
 Together, these domains ensure that every AI artifact influencing system behavior is **declared, verified, and continuously enforced**.
 
-For the complete formal specification — including definitions, requirements, and conformance criteria — see the full reference document:  
-[https://github.com/kahalewai/ai-scs/blob/main/ai-scs_standard.md](https://github.com/kahalewai/ai-scs/blob/main/ai-scs_standard.md)
-
 <br>
 
 | Control Domain | Name                                      | Responsibility                                      | Security Guarantee Provided                                |
@@ -63,6 +60,24 @@ This model is implementation-agnostic and applies to:
 * Enterprise AI platforms
 
 Security, trust, and governance are **runtime-enforced properties**, not aspirational controls.
+
+<br>
+
+## View the AI-SCS Security Specification
+
+For the complete formal specification — including definitions, requirements, and conformance criteria — see the full reference document:  
+[https://github.com/kahalewai/ai-scs/blob/main/ai-scs_standard.md](https://github.com/kahalewai/ai-scs/blob/main/ai-scs_standard.md)
+
+**Status:** Production-Ready  
+**Version:** v1.0.0  
+**License:** Apache License 2.0  
+**Date:** 2026-01-04
+
+<br>
+
+## Reference Implementation of AI-SCS
+
+For a reference implementation of AI-SCS, visit the AI Supply Chain Risk Management (AI-SCRM) Repository: <link> also released Apache 2.0
 
 <br>
 
@@ -144,9 +159,5 @@ We invite participation from:
 
 By working together, we can make **AI-SCS a foundational security standard** for trustworthy, production-grade AI systems.
 
----
-
-**Status:** Production-Ready  
-**Version:** v1.0.0  
-**License:** Apache License 2.0  
-**Date:** 2026-01-04
+<br>
+<br>

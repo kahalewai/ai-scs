@@ -2,9 +2,10 @@
 
 # AI-SCS — AI Supply Chain Standard
 
-Welcome to the **AI-SCS** (AI Supply Chain Standard) Specification Landing
+Welcome to the **AI-SCS** (AI Supply Chain Standard) Security Specification Landing
 
-![ai-scs](https://github.com/user-attachments/assets/ai-scs-placeholder)
+<img width="646" height="420" alt="ai-scs" src="https://github.com/user-attachments/assets/f243a999-2992-44a6-8966-5f73c53abe88" />
+
 
 </div>
 

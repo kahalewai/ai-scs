@@ -11,11 +11,7 @@ Welcome to the **AI-SCS** (AI Supply Chain Standard) Security Specification Land
 
 ## Intro
 
-As AI systems move into production and assume critical roles, they introduce **new and poorly understood supply chain risks** that extend far beyond traditional software dependencies. Model weights, datasets, embeddings, agent logic, tools, and runtime services can all materially influence behavior — often invisibly, dynamically, and without any source code changes.
-
-Existing software supply chain standards were not designed to account for these realities.
-
-**AI-SCS (AI Supply Chain Standard)** is a production-ready, vendor-neutral security standard that defines **minimum, enforceable requirements** for AI supply chain transparency, integrity, authenticity, and continuous validation.
+As AI systems move into production and assume critical roles, they introduce new and poorly understood supply chain risks that extend far beyond traditional software dependencies. Model weights, datasets, embeddings, agent logic, tools, and runtime services can all materially influence behavior - often invisibly, dynamically, and without any source code changes. Existing software supply chain standards were not designed to account for these realities. AI-SCS (AI Supply Chain Standard) is a production-ready, vendor-neutral security standard that defines minimum, enforceable requirements for AI supply chain transparency, integrity, authenticity, and continuous validation.
 
 AI-SCS establishes a clear, artifact-centric trust model for AI systems by requiring:
 
@@ -23,21 +19,21 @@ AI-SCS establishes a clear, artifact-centric trust model for AI systems by requi
 * Cryptographically verifiable integrity and authenticity guarantees
 * Continuous runtime validation and enforcement
 
-The goal of AI-SCS is simple: **make AI systems inspectable, verifiable, and governable throughout their entire lifecycle** — not just at build time.
+The goal of AI-SCS is simple: make AI systems inspectable, verifiable, and governable throughout their entire lifecycle - not just at build time.
 
 <br>
 
 ## AI-SCS Control Model
 
-AI-SCS defines a deterministic security and governance model for AI supply chains. Rather than relying on documentation, policy statements, or best-effort controls, AI-SCS enforces trust through **machine-verifiable artifacts and continuous validation**.
+AI-SCS defines a deterministic security and governance model for AI supply chains. Rather than relying on documentation, policy statements, or best-effort controls, AI-SCS enforces trust through machine-verifiable artifacts and continuous validation.
 
 The standard is organized around three mandatory control domains:
 
-* **ABOM** — AI Bill of Materials & Provenance  
-* **AI Artifact Integrity & Authenticity Assurance**  
-* **Continuous AI Supply Chain Validation**
+* ABOM — AI Bill of Materials & Provenance  
+* AI Artifact Integrity & Authenticity Assurance
+* Continuous AI Supply Chain Validation
 
-Together, these domains ensure that every AI artifact influencing system behavior is **declared, verified, and continuously enforced**.
+Together, these domains ensure that every AI artifact influencing system behavior is declared, verified, and continuously enforced.
 
 <br>
 
@@ -59,7 +55,7 @@ This model is implementation-agnostic and applies to:
 * Managed AI services
 * Enterprise AI platforms
 
-Security, trust, and governance are **runtime-enforced properties**, not aspirational controls.
+Security, trust, and governance are runtime-enforced properties, not aspirational controls.
 
 <br>
 
@@ -86,10 +82,10 @@ For a reference implementation of AI-SCS, visit the AI Supply Chain Risk Managem
 
 AI systems differ fundamentally from traditional software:
 
-* Behavior is shaped by **non-code artifacts**
-* Critical components are often **opaque or proprietary**
-* Assets may be **dynamically loaded or remotely executed**
-* Silent changes can occur **without redeployments**
+* Behavior is shaped by non-code artifacts
+* Critical components are often opaque or proprietary
+* Assets may be dynamically loaded or remotely executed
+* Silent changes can occur without redeployments
 * Emergent behavior can amplify small supply chain compromises
 
 AI-SCS directly addresses these risks by closing gaps that SBOM-only approaches cannot cover, including:
@@ -102,7 +98,7 @@ AI-SCS directly addresses these risks by closing gaps that SBOM-only approaches 
 * Agent logic compromise
 * Undetected model replacement
 
-AI-SCS is aligned with OWASP LLM03 (Supply Chain Vulnerabilities) and provides a foundation for enterprise-grade **AI Supply Chain Risk Management (AI-SCRM)**.
+AI-SCS is aligned with OWASP LLM03 (Supply Chain Vulnerabilities) and provides a foundation for enterprise-grade AI Supply Chain Risk Management (AI-SCRM).
 
 <br>
 
@@ -110,16 +106,16 @@ AI-SCS is aligned with OWASP LLM03 (Supply Chain Vulnerabilities) and provides a
 
 AI-SCS supports incremental adoption through defined conformance levels:
 
-* **Level 1 – Visibility**  
+* Level 1 – Visibility  
   ABOM generation and static provenance tracking
 
-* **Level 2 – Integrity**  
+* Level 2 – Integrity  
   Artifact signing and verification enforcement
 
-* **Level 3 – Continuous Assurance**  
+* Level 3 – Continuous Assurance
   Runtime validation, drift detection, and automated enforcement
 
-Partial adoption is allowed — but **implemented controls must not be weakened**.
+Partial adoption is allowed — but implemented controls must not be weakened.
 
 <br>
 
@@ -158,6 +154,6 @@ We invite participation from:
 
 <br>
 
-By working together, we can make **AI-SCS a foundational security standard** for trustworthy, production-grade AI systems.
+By working together, we can make AI-SCS a foundational security standard for trustworthy, production-grade AI systems.
 
 <br>

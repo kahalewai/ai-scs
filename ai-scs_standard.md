@@ -1,4 +1,6 @@
-# AI Supply Chain Standard (AI-SCS)
+# **AI-SCS - AI Supply Chain Standard**
+
+<br>
 
 ## Begin AI-SCS Standard
 
@@ -428,19 +430,22 @@ Implementations MAY integrate with:
 
 <br>
 
-## 9. Security Considerations
+## 9. Versioning
 
-Failure to implement AI-SCS controls exposes organizations to:
+AI-SCS versions follow semantic versioning:
 
-* Undetected model compromise
-* Loss of trust in AI outputs
-* Regulatory and compliance risk
-* Systemic AI integrity failures
+```
+MAJOR.MINOR.PATCH
+```
+
+This spec is **v1.0.0**.
 
 <br>
 
-## 10. Conclusion
+## 10. Licensing
 
-AI-SCS establishes the foundation for trustworthy AI systems by extending supply chain security principles into the AI domain. By standardizing visibility, integrity, and continuous validation, this specification enables organizations to defend against modern AI supply chain threats at scale.
+This security specification standard is licensed under the Apache License 2.0.
 
-## End AI-SCS Standard
+<br>
+
+## **End AI-SCS Standard**

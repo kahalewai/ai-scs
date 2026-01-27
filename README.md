@@ -19,7 +19,7 @@ AI-SCS establishes a clear, artifact-centric trust model for AI systems by requi
 * Cryptographically verifiable integrity and authenticity guarantees
 * Continuous runtime validation and enforcement
 
-The goal of AI-SCS is simple: make AI systems inspectable, verifiable, and governable throughout their entire lifecycle - not just at build time.
+The goal of AI-SCS is simple: make AI systems inspectable, verifiable, and governable throughout their entire lifecycle.
 
 <br>
 
@@ -29,7 +29,7 @@ AI-SCS defines a deterministic security and governance model for AI supply chain
 
 The standard is organized around three mandatory control domains:
 
-* ABOM — AI Bill of Materials & Provenance  
+* ABOM - AI Bill of Materials & Provenance  
 * AI Artifact Integrity & Authenticity Assurance
 * Continuous AI Supply Chain Validation
 

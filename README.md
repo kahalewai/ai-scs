@@ -8,6 +8,9 @@ Welcome to the **AI-SCS** (AI Supply Chain Standard) Security Specification Land
 
 </div>
 
+<br>
+
+
 ## Intro
 
 As AI systems move into production and assume critical roles, they introduce new and poorly understood supply chain risks that extend far beyond traditional software dependencies. Model weights, datasets, embeddings, agent logic, tools, and runtime services can all materially influence behavior - often invisibly, dynamically, and without any source code changes. Existing software supply chain standards were not designed to account for these realities. AI-SCS (AI Supply Chain Standard) is a production-ready, vendor-neutral security standard that defines minimum, enforceable requirements for AI supply chain transparency, integrity, authenticity, and continuous validation.
@@ -18,7 +21,7 @@ AI-SCS establishes a clear, artifact-centric trust model for AI systems by requi
 * Cryptographically verifiable integrity and authenticity guarantees
 * Continuous runtime validation and enforcement
 
-The goal of AI-SCS is simple: make AI systems inspectable, verifiable, and governable throughout their entire lifecycle.
+The goal of AI-SCS is to make AI systems inspectable, verifiable, and governable throughout their entire lifecycle.
 
 <br>
 
@@ -38,9 +41,9 @@ Together, these domains ensure that every AI artifact influencing system behavio
 
 | Control Domain | Name                                      | Responsibility                                      | Security Guarantee Provided                                |
 | -------------- | ----------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------- |
-| 1              | ABOM                                      | Declares all AI supply chain assets and provenance  | Eliminates unknown or undeclared AI components             |
-| 2              | Artifact Integrity & Authenticity         | Cryptographic verification of AI artifacts          | Prevents silent model, data, and dependency substitution   |
-| 3              | Continuous Supply Chain Validation        | Runtime enforcement and drift detection             | Detects and blocks unauthorized changes during execution   |
+|    CD 1        | ABOM                                      | Declares all AI supply chain assets and provenance  | Eliminates unknown or undeclared AI components             |
+|    CD 2        | Artifact Integrity & Authenticity         | Cryptographic verification of AI artifacts          | Prevents silent model, data, and dependency substitution   |
+|    CD 3        | Continuous Supply Chain Validation        | Runtime enforcement and drift detection             | Detects and blocks unauthorized changes during execution   |
 
 <br>
 
@@ -71,9 +74,15 @@ For the complete formal specification - including definitions, requirements, and
 
 <br>
 
-## Reference Implementation of AI-SCS
+## Visit the AI-SCRM Tooling
 
-For a reference implementation of AI-SCS, visit the AI Supply Chain Risk Management (AI-SCRM) Repository: [https://github.com/kahalewai/ai-scrm](https://github.com/kahalewai/ai-scrm), also released Apache 2.0
+For a reference implementation of AI-SCS, visit the AI Supply Chain Risk Management (AI-SCRM) Repository:
+
+[https://github.com/kahalewai/ai-scrm](https://github.com/kahalewai/ai-scrm)
+
+**Status:** Production-Ready  
+**Version:** v1.0.1  
+**License:** Apache License 2.0  
 
 <br>
 

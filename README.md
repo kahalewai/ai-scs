@@ -2,10 +2,9 @@
 
 # AI-SCS Supply Chain Standard for AI Systems
 
-Welcome to the **AI-SCS** (AI Supply Chain Standard) Security Specification Landing
-
 <img width="646" height="420" alt="ai-scs" src="https://github.com/user-attachments/assets/f243a999-2992-44a6-8966-5f73c53abe88" />
 
+Welcome to the **AI-SCS** (AI Supply Chain Standard) Security Specification Landing
 
 </div>
 
@@ -106,16 +105,16 @@ AI-SCS is aligned with OWASP LLM03 (Supply Chain Vulnerabilities) and provides a
 
 AI-SCS supports incremental adoption through defined conformance levels:
 
-* Level 1 – Visibility  
+* Level 1 - Visibility  
   ABOM generation and static provenance tracking
 
-* Level 2 – Integrity  
+* Level 2 - Integrity  
   Artifact signing and verification enforcement
 
-* Level 3 – Continuous Assurance
+* Level 3 - Continuous Assurance
   Runtime validation, drift detection, and automated enforcement
 
-Partial adoption is allowed — but implemented controls must not be weakened.
+Partial adoption is allowed but implemented controls must not be weakened.
 
 <br>
 

